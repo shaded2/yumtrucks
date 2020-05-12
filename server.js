@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
 const bodyParser= require('body-parser');
@@ -11,7 +12,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 const options = {
     provider: 'google',
-    apiKey: 'AIzaSyAhmBwpYlcuwFSM0rBjqePlo3xTapQUSro', //should be in env variable for security
+    apiKey: process.env.GOOGLE_MAPS_API_KEY
 };
 const geocoder = NodeGeocoder(options);
 
@@ -58,6 +59,7 @@ app.post('/locations', async (req, res) =>{
     }
 })
 
-var server = http.listen(3030, () =>{
+
+var server = http.listen(process.env.PORT, () =>{
     console.log('server is listening on port' , server.address().port);
 })
