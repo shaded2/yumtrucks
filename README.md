@@ -12,7 +12,7 @@ Its easy to get started with Yum Trucks. The only requirements are `git` and `no
 
 `git clone  git@github.com:shaded2/yumtrucks.git`
 
-`cd yumtrucks`
+`cd yumtrucks` save the .env file in this dirctory. 
 
 `node server.js`
 
