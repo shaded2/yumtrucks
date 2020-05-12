@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhmBwpYlcuwFSM0rBjqePlo3xTapQUSro&callback=initMap"
+  async defer></script>
+<style>
+
+    #map {
+    height: 500px;
+    width: 100%;
+    }
+
+</style>
+</head>
+
+<body>
+  
+  <div class="container">
+      <br>
+      <div class="jumbotron">
+          <h1 class="display-3">Yum Trucks</h1>
+          <br>
+          <div class="form-group row">
+              <input id="search" class="form-control col-sm-10 px-10" placeholder="Search by address, zip or business name">
+              <button id="search-btn" class="btn btn-success col-sm-2 col-form-label">Search 🔍</button>
+          </div>
+      </div>
+      <div  id="map" class=""></div><br>
+      <div id="locations" class="card-deck"></div>
+  </div>
+
+</body>
+
+<script>
+    $(()=>{
+        getLocations();
+
+        $("#search-btn").click(()=>{
+            searchLocations({loc: $("#search").val()});
+        })
+
+        function addLocation(location){
+            $("#locations").append(
+                                    `<div class="card bg-light mb-3">
+                                    <div class="card-header">${location.applicant}</div>
+                                    <div class="card-body">
+                                    <h5 class="card-title">${location.address}</h5>
+                                    <p class="card-text">${location.fooditems}</p>
+                                    </div>` 
+            )
+
+            addMarker({lat: parseFloat(location.latitude), lng: parseFloat(location.longitude)}, bounds)
+
+        }                            
+
+        function getLocations(){
+            $.get('/locations', (data)=>{
+                deleteMarkers()
+                data.forEach(addLocation)
+                setMapOnAll(map)
+            })
+        }
+
+        function searchLocations(loc){
+            $( "#locations" ).empty();
+            $.post('/locations', loc, (data)=>{
+                //layerGroup.clearLayers();
+                deleteMarkers()    
+                data.forEach(addLocation);
+                setMapOnAll(map)
+            })
+        }
+    })
+
+    let markers = [];    
+    let map;
+    let bounds;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 37.779, lng: -122.419},
+        zoom: 13
+      });
+      bounds = new google.maps.LatLngBounds();
+    }
+    
+     // Adds a marker to the map and push to the array.
+    function addMarker(location, bounds) {
+       let marker = new google.maps.Marker({
+         position: location,
+         map: map
+       });
+       loc = new google.maps.LatLng(marker.position.lat(), marker.position.lng());
+       bounds.extend(loc);
+       markers.push(marker);
+       map.fitBounds(bounds);     //auto-zoom
+       map.panToBounds(bounds);   //auto-center
+    }
+
+      // Sets the map on all markers in the array.
+      function setMapOnAll(map) {
+        for (let i = 0; i < markers.length; i++) {
+          markers[i].setMap(map);
+        }
+      }
+
+      // Removes the markers from the map, but keeps them in the array.
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      // Deletes all markers in the array by removing references to them.
+      function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+
+    let input = document.getElementById('search');
+    let options = {
+    };
+  </script>
+  </html>
